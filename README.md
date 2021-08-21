@@ -32,6 +32,37 @@ To quieten log spam please connect the interfaces below
       
   The app will restart with the new URL 
       
+## Audio
+
+  To make use of audio playback on your Ubuntu Core 20 Kiosk you
+  need to install the pulseaudio snap (currently it requires the version
+  from the beta channel, since only this provides the `audio-playback`
+  interface
+
+    snap install --beta pulseaudio
+
+  Now connect the app to the audio-playback slot pulseaudio provides
+
+    snap connect electron-kiosk-uc20:audio-playback pulseaudio
+
+  And restart it with
+
+    snap restart electron-kiosk-uc20
+
+  Audio playback should work seamlessly now. To adjust the volume you
+  can use the shipped pactl command when logged in via ssh
+
+    sudo pulseaudio.pactl set-sink-volume @DEFAULT_SINK@ +10%
+
+  Raises the volume by 10%
+
+    sudo pulseaudio.pactl set-sink-volume @DEFAULT_SINK@ -10%
+
+  Lowers it by 10%
+  To set it to an exact value you use
+
+    sudo pulseaudio.pactl set-sink-volume @DEFAULT_SINK@ 50%
+
 ## Building
 
 Just clone this tree, make sure to have `snapcraft` installed, cd into
