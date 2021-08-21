@@ -1,0 +1,86 @@
+name: electron-kiosk-uc20
+version: '0.1'
+summary: Electron based kiosk browser
+description: |
+  Simple Electron Kiosk app that acts as a fullscreen browser
+  to be used on Ubuntu Core 20 systems with the ubuntu-frame display
+  server.
+
+  First install ubuntu-frame with
+
+      snap install ubuntu-frame
+  
+  To quieten log spam please connect the interfaces below
+
+      snap connect electron-kiosk-uc20:hardware-observe
+      snap connect electron-kiosk-uc20:network-observe
+      snap connect electron-kiosk-uc20:process-control
+
+  The app comes with a configuarble url option that allows you to 
+  pick which page is shown. To use this feature simply call
+
+      snap set electron-kiosk-uc20 url=https://www.ubuntu.com
+
+base: core20
+confinement: strict
+grade: devel
+compression: lzo
+
+apps:
+  electron-kiosk-uc20:
+    daemon: simple
+    restart-condition: always
+    extensions: [ gnome-3-38 ]
+    command-chain:
+      - env-setup
+    command: usr/local/bin/x11_kiosk_launch $SNAP/snap/command-chain/desktop-launch $SNAP/usr/bin/wrapper
+    plugs:
+      - audio-playback
+      - browser-support
+      - hardware-observe
+      - network
+      - network-bind
+      - network-observe
+      - opengl
+      - process-control
+      - wayland
+
+# Needed by Mir and/or Xwayland
+layout:
+  /usr/share/X11:
+    bind: $SNAP/usr/share/X11
+  /usr/bin/xkbcomp:
+    symlink: $SNAP/usr/bin/xkbcomp
+  /usr/share/icons:
+    bind: $SNAP/gnome-platform/usr/share/icons
+  /usr/share/fonts:
+    bind: $SNAP/gnome-platform/usr/share/fonts
+  /usr/local/share/fonts:
+    bind: $SNAP/usr/local/share/fonts
+  /etc/fonts:
+    bind: $SNAP/gnome-platform/etc/fonts
+
+parts:
+  electron-helloworld:
+    plugin: nil
+    source: https://github.com/electron/electron-quick-start.git
+    build-environment:
+      - PATH: "$PATH:$SNAPCRAFT_PART_BUILD/node_modules/.bin"
+    override-build: |
+      npm install electron-packager
+      cp $SNAPCRAFT_PROJECT_DIR/electron/main.js .
+      electron-packager . --overwrite --platform=linux \
+          --output=release-build --prune=true
+      cp -a ./electron-quick-start-linux-* $SNAPCRAFT_PART_INSTALL/electron-helloworld
+    stage-packages:
+      - libnspr4
+      - libnss3
+    build-snaps:
+      - node/14/stable
+    stage-snaps:
+      - mir-kiosk-x11
+  wrapper:
+    plugin: dump
+    source: wrapper
+    organize:
+      wrapper.sh: usr/bin/wrapper
