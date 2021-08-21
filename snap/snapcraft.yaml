@@ -2,7 +2,7 @@ name: electron-kiosk-uc20
 version: '0.1'
 summary: Electron based kiosk browser
 description: |
-  Simple Electron Kiosk app that acts as a fullscreen browser
+  A simple Electron Kiosk app that acts as a fullscreen browser
   to be used on Ubuntu Core 20 systems with the ubuntu-frame display
   server.
 
@@ -25,6 +25,11 @@ base: core20
 confinement: strict
 grade: devel
 compression: lzo
+
+architectures:
+  - build-on: amd64
+  - build-on: armhf
+  - build-on: arm64
 
 apps:
   electron-kiosk-uc20:
